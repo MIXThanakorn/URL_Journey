@@ -22,7 +22,6 @@ URL Journey ไม่ใช่ packet sniffer และไม่ส่ง reques
 - [Security and privacy](#security-and-privacy)
 - [Accuracy and limitations](#accuracy-and-limitations)
 - [Testing checklist](#testing-checklist)
-- [Deployment](#deployment)
 
 ## Product goals
 
@@ -492,11 +491,3 @@ npm run build
 ```
 
 ตรวจ route หลักและ representative query URL หลัง build ทุกครั้ง
-
-## Deployment
-
-โปรเจ็กต์มี `.openai/hosting.json` สำหรับ OpenAI Sites การ publish จะ build Cloudflare-compatible worker, package output จาก commit เดียวกับ source และ deploy เป็น private Site โดยคง URL/audience เดิม
-
-Current production site:
-
-[https://url-journey.kjn09402.chatgpt.site](https://url-journey.kjn09402.chatgpt.site)
