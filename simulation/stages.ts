@@ -1,0 +1,88 @@
+import type { SimulationStage, UrlInfo } from "@/types/simulation";
+
+export const stages: readonly SimulationStage[] = [
+  {
+    id: "url-parse",
+    eyebrow: "01 / BROWSER",
+    title: "URL Parsing",
+    shortTitle: "URL",
+    description: "The browser separates the address into the pieces it needs for the request.",
+    technical: "The URL parser identifies the scheme, hostname, effective port, path, query string, and fragment. The fragment stays in the browser and is not sent in the HTTP request.",
+    duration: 1100,
+    concepts: ["Scheme", "Hostname", "Port", "Path and query"],
+  },
+  {
+    id: "dns",
+    eyebrow: "02 / NAME RESOLUTION",
+    title: "DNS Lookup",
+    shortTitle: "DNS",
+    description: "DNS finds an IP address that belongs to the website name.",
+    technical: "A recursive resolver may answer from cache or query authoritative infrastructure. The path shown here is a simplified educational representation, not a trace of a real request.",
+    duration: 1400,
+    concepts: ["Recursive resolver", "Authoritative server", "IP address", "TTL and cache"],
+  },
+  {
+    id: "tcp",
+    eyebrow: "03 / TRANSPORT",
+    title: "TCP Connection",
+    shortTitle: "TCP",
+    description: "The browser and server agree to open a reliable connection.",
+    technical: "A simplified three-way handshake exchanges SYN, SYN-ACK, and ACK messages before application data is sent.",
+    duration: 1300,
+    concepts: ["SYN", "SYN-ACK", "ACK", "Reliable transport"],
+  },
+  {
+    id: "tls",
+    eyebrow: "04 / SECURITY",
+    title: "TLS Handshake",
+    shortTitle: "TLS",
+    description: "The client and server establish an encrypted channel and verify identity.",
+    technical: "This simplified flow combines several TLS 1.3 details into ClientHello, ServerHello, certificate validation, and key establishment.",
+    duration: 1450,
+    concepts: ["Certificate", "Encryption", "Key agreement", "Server identity"],
+  },
+  {
+    id: "http-request",
+    eyebrow: "05 / REQUEST",
+    title: "HTTP Request",
+    shortTitle: "REQUEST",
+    description: "The browser asks the server for a specific resource.",
+    technical: "The request includes a method, request target, protocol version, and headers. This simulation uses a representative HTTP/1.1 view for clarity.",
+    duration: 1200,
+    concepts: ["Method", "Request target", "Headers", "Content negotiation"],
+  },
+  {
+    id: "http-response",
+    eyebrow: "06 / RESPONSE",
+    title: "HTTP Response",
+    shortTitle: "RESPONSE",
+    description: "The server returns a status, headers, and the requested document.",
+    technical: "The response below is simulated. URL Journey does not inspect the real server or claim to know its internal application flow.",
+    duration: 1300,
+    concepts: ["Status code", "Response headers", "Content type", "Response body"],
+  },
+  {
+    id: "render",
+    eyebrow: "07 / BROWSER RENDERER",
+    title: "Rendering Pipeline",
+    shortTitle: "RENDER",
+    description: "The browser turns HTML and CSS into pixels on the screen.",
+    technical: "HTML produces the DOM, CSS produces the CSSOM, and both inform the render tree. Layout calculates geometry; paint records visual layers for compositing.",
+    duration: 1800,
+    concepts: ["DOM and CSSOM", "Render tree", "Layout", "Paint"],
+  },
+  {
+    id: "complete",
+    eyebrow: "08 / COMPLETE",
+    title: "Page Rendered",
+    shortTitle: "SCREEN",
+    description: "The simulated journey is complete. The page can now appear on screen.",
+    technical: "Real browsers overlap, cache, reuse, and parallelize many of these steps. This timeline is intentionally sequential so each concept is easy to inspect.",
+    duration: 900,
+    concepts: ["Document ready", "Pixels visible", "Resources may continue", "Interactive page"],
+  },
+] as const;
+
+export function getStageDuration(stage: SimulationStage, url: UrlInfo): number {
+  return stage.id === "tls" && !url.secure ? 650 : stage.duration;
+}
