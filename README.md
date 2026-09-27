@@ -22,7 +22,6 @@ URL Journey ไม่ใช่ packet sniffer และไม่ส่ง reques
 - [Security and privacy](#security-and-privacy)
 - [Accuracy and limitations](#accuracy-and-limitations)
 - [Testing checklist](#testing-checklist)
-- [Deployment](#deployment)
 
 ## Product goals
 
@@ -495,42 +494,8 @@ npm run build
 
 ## Deployment
 
-โปรเจ็กต์ตั้งค่าเป็น Next.js มาตรฐานและพร้อมให้ Vercel ตรวจจับ framework โดยอัตโนมัติ ไม่ต้องกำหนด Output Directory หรือเพิ่ม environment variable สำหรับฟีเจอร์ปัจจุบัน
+โปรเจ็กต์มี `.openai/hosting.json` สำหรับ OpenAI Sites การ publish จะ build Cloudflare-compatible worker, package output จาก commit เดียวกับ source และ deploy เป็น private Site โดยคง URL/audience เดิม
 
-### Deploy ผ่าน Vercel Dashboard
+Current production site:
 
-1. Push โปรเจ็กต์ขึ้น GitHub, GitLab หรือ Bitbucket
-2. ที่ Vercel เลือก **Add New → Project** แล้ว import repository
-3. ตรวจว่า Framework Preset เป็น **Next.js**
-4. ใช้ค่ามาตรฐานต่อไปนี้:
-
-   - Install Command: `npm install`
-   - Build Command: `npm run build`
-   - Output Directory: ปล่อยว่าง เพื่อให้ Next.js integration จัดการ `.next`
-   - Node.js: 22 หรือใหม่กว่า
-
-5. กด **Deploy**
-
-ทุก commit ที่ push ไปยัง production branch จะสร้าง production deployment ใหม่ ส่วน pull request และ branch อื่นจะได้ preview deployment แยกกัน
-
-### Deploy ผ่าน Vercel CLI
-
-```bash
-npm install -g vercel
-vercel
-vercel --prod
-```
-
-คำสั่ง `vercel` ครั้งแรกจะถามการเชื่อม project และค่าพื้นฐาน ให้เลือก Next.js และใช้ค่าที่ตรวจพบจาก repository ได้เลย
-
-### ตรวจ production build ในเครื่อง
-
-```bash
-npm install
-npm run build
-npm run start
-```
-
-จากนั้นเปิด `http://localhost:3000` หาก port 3000 ถูกใช้งาน ให้ใช้ `npm run start -- -p 3001`
-
-> `.openai/hosting.json`, `vite.config.ts` และไฟล์ Cloudflare/Sites เดิมถูกเก็บไว้เป็น legacy reference แต่ไม่อยู่ในเส้นทาง type-check หรือ build ของ Vercel
+[https://url-journey.kjn09402.chatgpt.site](https://url-journey.kjn09402.chatgpt.site)
