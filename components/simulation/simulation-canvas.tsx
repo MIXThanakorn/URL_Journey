@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, FileCode2, LockKeyhole, Monitor, Server, TriangleAlert, Waypoints } from "lucide-react";
-import type { ErrorScenario, HttpMethod, StageId, UrlInfo } from "@/types/simulation";
+import type { ErrorScenario, HttpMethod, HttpVersion, StageId, UrlInfo, VisitMode } from "@/types/simulation";
 
 interface CanvasProps {
   stage: StageId;
@@ -12,9 +12,11 @@ interface CanvasProps {
   error?: ErrorScenario;
   method: HttpMethod;
   responseStatus: number;
+  httpVersion: HttpVersion;
+  visitMode: VisitMode;
 }
 
-const nodeStyle = "absolute flex min-w-24 flex-col items-center gap-2 text-center font-mono text-[11px] text-slate-400";
+const nodeStyle = "absolute flex min-w-24 flex-col items-center gap-2 text-center font-mono text-xs text-slate-400";
 
 function Node({ x, y, icon, label, active = false }: { x: string; y: string; icon: React.ReactNode; label: string; active?: boolean }) {
   return (
@@ -30,7 +32,7 @@ function Node({ x, y, icon, label, active = false }: { x: string; y: string; ico
 function Packet({ label, reverse = false, delay = 0 }: { label: string; reverse?: boolean; delay?: number }) {
   return (
     <motion.div
-      className="absolute left-[18%] top-1/2 z-10 -translate-y-1/2 rounded border border-cyan-300/50 bg-[#061521] px-2 py-1 font-mono text-[10px] font-semibold text-cyan-200 shadow-[0_0_18px_rgb(34_211_238/26%)]"
+      className="absolute left-[18%] top-1/2 z-10 -translate-y-1/2 rounded border border-cyan-300/50 bg-[#061521] px-2 py-1 font-mono text-xs font-semibold text-cyan-200 shadow-[0_0_18px_rgb(34_211_238/26%)]"
       initial={{ left: reverse ? "74%" : "18%", opacity: 0 }}
       animate={{ left: reverse ? "18%" : "74%", opacity: [0, 1, 1, 0] }}
       transition={{ duration: 1.4, repeat: Infinity, delay, ease: "easeInOut" }}
@@ -49,7 +51,7 @@ function UrlParseView({ url }: { url: UrlInfo }) {
     <div className="grid h-full content-center grid-cols-2 gap-2 px-5 sm:grid-cols-3">
       {pieces.map(([label, value], index) => (
         <motion.div key={label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.08 }} className="rounded-md border border-slate-800 bg-[#08111d]/90 p-3">
-          <p className="font-mono text-[9px] tracking-[0.18em] text-slate-600">{label}</p>
+          <p className="font-mono text-xs tracking-[0.12em] text-slate-600">{label}</p>
           <p className="mt-1 truncate font-mono text-xs text-cyan-200">{value}</p>
         </motion.div>
       ))}
@@ -57,13 +59,14 @@ function UrlParseView({ url }: { url: UrlInfo }) {
   );
 }
 
-function NetworkView({ stage, secure, method, responseStatus }: { stage: StageId; secure: boolean; method: HttpMethod; responseStatus: number }) {
+function NetworkView({ stage, secure, method, responseStatus, httpVersion, visitMode }: { stage: StageId; secure: boolean; method: HttpMethod; responseStatus: number; httpVersion: HttpVersion; visitMode: VisitMode }) {
   const isDns = stage === "dns";
   const isTcp = stage === "tcp";
   const isTls = stage === "tls";
   const isRequest = stage === "http-request";
   const isResponse = stage === "http-response";
-  const label = isDns ? "DNS QUERY" : isTcp ? "SYN" : isTls ? "CLIENT HELLO" : isRequest ? `${method} /` : `${responseStatus}`;
+  const quic = httpVersion === "http-3";
+  const label = isDns ? (visitMode === "repeat" ? "CACHE HIT" : "DNS QUERY") : isTcp ? (quic ? "QUIC INITIAL" : "SYN") : isTls ? (quic ? "TLS IN QUIC" : "CLIENT HELLO") : isRequest ? `${method} /` : `${responseStatus}`;
   const reverse = isResponse;
 
   if (isTls && !secure) {
@@ -87,9 +90,9 @@ function NetworkView({ stage, secure, method, responseStatus }: { stage: StageId
       <Node x="18%" y="50%" icon={<Monitor size={22} />} label="BROWSER" active />
       <Node x="82%" y="50%" icon={isDns ? <Waypoints size={22} /> : <Server size={22} />} label={isDns ? "DNS RESOLVER" : urlLabel(stage)} active />
       <Packet label={label} reverse={reverse} />
-      {(isTcp || isTls) && <Packet label={isTcp ? "SYN-ACK" : "SERVER HELLO"} reverse delay={0.65} />}
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 rounded-full border border-slate-800 bg-[#07101b] px-3 py-1 font-mono text-[10px] text-slate-500">
-        {isDns ? "SIMULATED • 93.184.216.34 • TTL 3600" : isTls ? "SIMPLIFIED REPRESENTATION" : "SIMULATED NETWORK FLOW"}
+      {(isTcp || isTls) && <Packet label={isTcp ? (quic ? "QUIC HANDSHAKE" : "SYN-ACK") : (quic ? "ENCRYPTED KEYS" : "SERVER HELLO")} reverse delay={0.65} />}
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 rounded-full border border-slate-800 bg-[#07101b] px-3 py-1 font-mono text-xs text-slate-500">
+        {isDns ? `SIMULATED • ${visitMode === "repeat" ? "DNS CACHE REUSED" : "93.184.216.34 • TTL 3600"}` : quic ? "HTTP/3 • QUIC + TLS 1.3" : isTls ? "SIMPLIFIED REPRESENTATION" : "SIMULATED NETWORK FLOW"}
       </div>
     </div>
   );
@@ -123,7 +126,7 @@ function RenderView({ complete = false }: { complete?: boolean }) {
                 </div>
               ))}
             </div>
-            <div className="mt-5 grid grid-cols-2 gap-2 font-mono text-[9px] text-slate-600">
+            <div className="mt-5 grid grid-cols-2 gap-2 font-mono text-xs text-slate-600">
               <div className="rounded border border-slate-800 bg-[#050a11] p-3"><span className="text-blue-300">html</span><br />├─ head<br />└─ body<br />&nbsp;&nbsp;├─ header<br />&nbsp;&nbsp;└─ main</div>
               <div className="rounded border border-slate-800 bg-[#050a11] p-3"><span className="text-violet-300">cssom</span><br />├─ body<br />│&nbsp;&nbsp;└─ display:block<br />└─ main<br />&nbsp;&nbsp;└─ color:…</div>
             </div>
@@ -138,11 +141,11 @@ function RenderView({ complete = false }: { complete?: boolean }) {
   );
 }
 
-export function SimulationCanvas({ stage, url, progress, paused, error, method, responseStatus }: CanvasProps) {
+export function SimulationCanvas({ stage, url, progress, paused, error, method, responseStatus, httpVersion, visitMode }: CanvasProps) {
   const networkStages: readonly StageId[] = ["dns", "tcp", "tls", "http-request", "http-response"];
   return (
     <section className="relative min-h-[330px] overflow-hidden rounded-lg border border-slate-800/90 bg-[#070d16]/95 shadow-[inset_0_1px_rgb(255_255_255/2%)]">
-      <div className="absolute inset-x-0 top-0 z-20 flex h-10 items-center justify-between border-b border-slate-800/80 bg-[#09121e]/90 px-4 font-mono text-[10px] tracking-wider text-slate-500">
+      <div className="absolute inset-x-0 top-0 z-20 flex h-10 items-center justify-between border-b border-slate-800/80 bg-[#09121e]/90 px-4 font-mono text-xs tracking-wider text-slate-500">
         <span className="flex items-center gap-2"><span className={`h-1.5 w-1.5 rounded-full ${paused ? "bg-amber-400" : "bg-cyan-400 shadow-[0_0_8px_#22d3ee]"}`} /> LIVE SIMULATION</span>
         <span>{Math.round(progress).toString().padStart(3, "0")}%</span>
       </div>
@@ -156,7 +159,7 @@ export function SimulationCanvas({ stage, url, progress, paused, error, method, 
             ) : (
               <>
                 {stage === "url-parse" && <UrlParseView url={url} />}
-                {networkStages.includes(stage) && <NetworkView stage={stage} secure={url.secure} method={method} responseStatus={responseStatus} />}
+                {networkStages.includes(stage) && <NetworkView stage={stage} secure={url.secure} method={method} responseStatus={responseStatus} httpVersion={httpVersion} visitMode={visitMode} />}
                 {stage === "render" && <RenderView />}
                 {stage === "complete" && <RenderView complete />}
               </>

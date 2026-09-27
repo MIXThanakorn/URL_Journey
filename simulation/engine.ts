@@ -7,6 +7,8 @@ export const DEFAULT_OPTIONS: SimulationOptions = {
   method: "GET",
   responseStatus: 200,
   contentType: "text/html",
+  httpVersion: "http-2",
+  visitMode: "first",
 };
 
 export function createInitialState(url: string, parsedUrl: UrlInfo): SimulationState {
@@ -71,6 +73,10 @@ export function simulationReducer(
       return state;
     case "SELECT_STAGE":
       return { ...state, selectedIndex: action.index };
+    case "JUMP_STAGE":
+      return { ...state, activeIndex: action.index, selectedIndex: action.index, progress: 0 };
+    case "SET_PROGRESS":
+      return { ...state, progress: Math.min(100, Math.max(0, action.progress)) };
     case "REPLAY":
       return { ...state, status: "running", activeIndex: 0, selectedIndex: 0, progress: 0, elapsed: 0 };
     case "RESET":

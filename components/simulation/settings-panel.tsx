@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { errorScenarios } from "@/simulation/scenarios";
 import { networkProfiles } from "@/simulation/network";
-import type { ErrorScenarioId, HttpMethod, NetworkProfileId } from "@/types/simulation";
+import type { ErrorScenarioId, HttpMethod, HttpVersion, NetworkProfileId, VisitMode } from "@/types/simulation";
 
 interface SettingsPanelProps {
   profile: NetworkProfileId;
@@ -16,12 +16,16 @@ interface SettingsPanelProps {
   responseStatus: number;
   contentType: string;
   customLatency: number;
+  httpVersion: HttpVersion;
+  visitMode: VisitMode;
   onProfileChange: (value: NetworkProfileId) => void;
   onScenarioChange: (value: ErrorScenarioId) => void;
   onMethodChange: (value: HttpMethod) => void;
   onResponseStatusChange: (value: number) => void;
   onContentTypeChange: (value: string) => void;
   onCustomLatencyChange: (value: number) => void;
+  onHttpVersionChange: (value: HttpVersion) => void;
+  onVisitModeChange: (value: VisitMode) => void;
 }
 
 export function SettingsPanel(props: SettingsPanelProps) {
@@ -56,8 +60,17 @@ export function SettingsPanel(props: SettingsPanelProps) {
             </Select>
           </SettingBlock>
 
+          <div className="grid grid-cols-2 gap-3">
+            <SettingBlock label="HTTP version">
+              <Select value={props.httpVersion} onValueChange={(value) => props.onHttpVersionChange(value as HttpVersion)}><SelectTrigger className="w-full border-slate-700 bg-[#050a12]"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="http-1.1">HTTP/1.1</SelectItem><SelectItem value="http-2">HTTP/2</SelectItem><SelectItem value="http-3">HTTP/3 (QUIC)</SelectItem></SelectContent></Select>
+            </SettingBlock>
+            <SettingBlock label="Visit type">
+              <Select value={props.visitMode} onValueChange={(value) => props.onVisitModeChange(value as VisitMode)}><SelectTrigger className="w-full border-slate-700 bg-[#050a12]"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="first">First visit</SelectItem><SelectItem value="repeat">Repeat / cached</SelectItem></SelectContent></Select>
+            </SettingBlock>
+          </div>
+
           <div className="border-t border-slate-800 pt-6">
-            <p className="font-mono text-[10px] tracking-[.15em] text-cyan-400">CUSTOM SCENARIO</p>
+            <p className="font-mono text-xs tracking-[.12em] text-cyan-400">CUSTOM SCENARIO</p>
             <p className="mt-2 text-sm leading-6 text-slate-500">Change the representative HTTP exchange without sending a real request.</p>
           </div>
 

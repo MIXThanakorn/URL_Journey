@@ -1,13 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Braces, ChevronDown, Globe2, Monitor, Network, Server, Waypoints } from "lucide-react";
+import { Braces, ChevronDown, Cloud, Globe2, Monitor, Network, Server, ShieldCheck, Waypoints } from "lucide-react";
 
 const layers = [
-  { icon: Monitor, label: "Browser", detail: "URL parser · cache · renderer", color: "text-cyan-300 border-cyan-400/30" },
+  { icon: Monitor, label: "Browser", detail: "URL parser · cache · service worker", color: "text-cyan-300 border-cyan-400/30" },
   { icon: Waypoints, label: "DNS", detail: "Resolver · cache · authority", color: "text-blue-300 border-blue-400/30" },
   { icon: Network, label: "Network", detail: "TCP or QUIC · TLS · routing", color: "text-violet-300 border-violet-400/30" },
-  { icon: Server, label: "Server", detail: "Routing · application · data", color: "text-amber-300 border-amber-400/30" },
+  { icon: Cloud, label: "CDN / Edge", detail: "Cache · proxy · nearest region", color: "text-sky-300 border-sky-400/30" },
+  { icon: ShieldCheck, label: "Load balancer", detail: "TLS edge · health · routing", color: "text-amber-300 border-amber-400/30" },
+  { icon: Server, label: "Server", detail: "Application · services · data", color: "text-orange-300 border-orange-400/30" },
   { icon: Globe2, label: "Response", detail: "Status · headers · representation", color: "text-emerald-300 border-emerald-400/30" },
   { icon: Braces, label: "Browser renderer", detail: "DOM · CSSOM · layout · paint", color: "text-cyan-300 border-cyan-400/30" },
 ] as const;
@@ -17,10 +19,10 @@ export function ArchitectureView({ activeIndex }: { activeIndex: number }) {
   return (
     <section className="min-h-[330px] rounded-lg border border-slate-800/90 bg-[#070d16]/95 p-5">
       <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
-        <div><p className="font-mono text-[10px] tracking-[.15em] text-cyan-400">SYSTEM MAP</p><h2 className="mt-1 text-lg font-semibold">Architecture view</h2></div>
-        <span className="rounded border border-slate-700 px-2 py-1 font-mono text-[9px] text-slate-500">SIMPLIFIED REPRESENTATION</span>
+        <div><p className="font-mono text-xs tracking-[.12em] text-cyan-400">SYSTEM MAP</p><h2 className="mt-1 text-lg font-semibold">Architecture view</h2></div>
+        <span className="rounded border border-slate-700 px-2 py-1 font-mono text-xs text-slate-500">SIMPLIFIED REPRESENTATION</span>
       </div>
-      <div className="mt-5 grid gap-2 sm:grid-cols-3 xl:grid-cols-6">
+      <div className="mt-5 grid gap-2 sm:grid-cols-4 xl:grid-cols-8">
         {layers.map((layer, index) => {
           const Icon = layer.icon;
           const active = index === activeLayer;
@@ -30,7 +32,7 @@ export function ArchitectureView({ activeIndex }: { activeIndex: number }) {
                 <Icon size={19} className={layer.color.split(" ")[0]} />
                 <p className="mt-5 font-mono text-xs text-slate-200">{layer.label}</p>
                 <p className="mt-2 text-xs leading-5 text-slate-600">{layer.detail}</p>
-                <span className="absolute right-3 top-3 font-mono text-[9px] text-slate-700">0{index + 1}</span>
+                <span className="absolute right-3 top-3 font-mono text-xs text-slate-700">0{index + 1}</span>
               </motion.div>
               {index < layers.length - 1 && <ChevronDown className="mx-auto text-slate-700 sm:hidden" size={15} />}
             </div>
@@ -47,5 +49,5 @@ export function ArchitectureView({ activeIndex }: { activeIndex: number }) {
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
-  return <div><p className="font-mono text-[9px] tracking-wider text-slate-700">{label}</p><p className="mt-1 text-xs text-slate-400">{value}</p></div>;
+  return <div><p className="font-mono text-xs tracking-wider text-slate-700">{label}</p><p className="mt-1 text-sm text-slate-400">{value}</p></div>;
 }

@@ -8,6 +8,8 @@ export const errorScenarios: readonly ErrorScenario[] = [
   { id: "404", label: "404 Not Found", stage: "http-response", title: "404 — Resource not found", explanation: "The server responded, but it could not find a resource for this request target." },
   { id: "500", label: "500 Server Error", stage: "http-response", title: "500 — Server error", explanation: "The server encountered an unexpected condition while handling the request." },
   { id: "slow-server", label: "Slow server", stage: null, title: "Slow server processing", explanation: "The server response stage takes longer than the selected network profile alone would suggest." },
+  { id: "cors-error", label: "CORS blocked", stage: "http-response", title: "Cross-origin response blocked", explanation: "The browser received a response but did not expose it because the required CORS permission was absent." },
+  { id: "redirect", label: "HTTP → HTTPS redirect", stage: null, title: "Redirect followed", explanation: "The first response points the browser to a secure HTTPS URL, creating a second request chain." },
 ] as const;
 
 export function getErrorScenario(id: ErrorScenarioId): ErrorScenario {
