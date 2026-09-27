@@ -11,13 +11,21 @@ const eslintConfig = defineConfig([
     ".next/**",
     "out/**",
     "build/**",
+    "dist/**",
+    "db/**",
+    "scripts/**",
+    ".sites-runtime/**",
+    ".wrangler/**",
+    "vite.config.ts",
+    "drizzle.config.ts",
+    "cloudflare-env.d.ts",
     "next-env.d.ts",
   ]),
   {
     files: ["components/ui/**/*.{ts,tsx}", "hooks/use-mobile.ts"],
     rules: {
       // These files are vendored verbatim from shadcn@4.17.0. Keep the
-      // registry source intact while applying the stricter rules to Site code.
+      // registry source intact while applying the stricter rules to app code.
       "@typescript-eslint/no-unused-vars": "off",
       "react-hooks/purity": "off",
       "react-hooks/set-state-in-effect": "off",

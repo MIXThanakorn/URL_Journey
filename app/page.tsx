@@ -100,28 +100,30 @@ export default function Home() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const sharedUrl = params.get("u");
-    const sharedProfile = params.get("profile");
-    const sharedScenario = params.get("error");
-    const sharedMode = params.get("mode");
-    const sharedView = params.get("view");
-    const sharedMethod = params.get("method");
-    const sharedHttpVersion = params.get("http");
-    const sharedVisit = params.get("visit");
-    if (sharedUrl && parseUrl(sharedUrl)) setInput(sharedUrl);
-    if (isOneOf(sharedProfile, profileIds)) setProfile(sharedProfile);
-    if (isOneOf(sharedScenario, scenarioIds)) setScenario(sharedScenario);
-    if (isOneOf(sharedMode, modeIds)) setMode(sharedMode);
-    if (isOneOf(sharedView, viewIds)) setView(sharedView);
-    if (isOneOf(sharedMethod, methodIds)) setMethod(sharedMethod);
-    if (isOneOf(sharedHttpVersion, httpVersionIds)) setHttpVersion(sharedHttpVersion);
-    if (isOneOf(sharedVisit, visitModeIds)) setVisitMode(sharedVisit);
-    const sharedStatus = Number(params.get("status"));
-    if (sharedStatus >= 100 && sharedStatus <= 599) setResponseStatus(sharedStatus);
-    const sharedType = params.get("type");
-    if (sharedType) setContentType(sharedType);
-    const sharedLatency = Number(params.get("latency"));
-    if (sharedLatency >= 0.5 && sharedLatency <= 4) setCustomLatency(sharedLatency);
+    queueMicrotask(() => {
+      const sharedUrl = params.get("u");
+      const sharedProfile = params.get("profile");
+      const sharedScenario = params.get("error");
+      const sharedMode = params.get("mode");
+      const sharedView = params.get("view");
+      const sharedMethod = params.get("method");
+      const sharedHttpVersion = params.get("http");
+      const sharedVisit = params.get("visit");
+      if (sharedUrl && parseUrl(sharedUrl)) setInput(sharedUrl);
+      if (isOneOf(sharedProfile, profileIds)) setProfile(sharedProfile);
+      if (isOneOf(sharedScenario, scenarioIds)) setScenario(sharedScenario);
+      if (isOneOf(sharedMode, modeIds)) setMode(sharedMode);
+      if (isOneOf(sharedView, viewIds)) setView(sharedView);
+      if (isOneOf(sharedMethod, methodIds)) setMethod(sharedMethod);
+      if (isOneOf(sharedHttpVersion, httpVersionIds)) setHttpVersion(sharedHttpVersion);
+      if (isOneOf(sharedVisit, visitModeIds)) setVisitMode(sharedVisit);
+      const sharedStatus = Number(params.get("status"));
+      if (sharedStatus >= 100 && sharedStatus <= 599) setResponseStatus(sharedStatus);
+      const sharedType = params.get("type");
+      if (sharedType) setContentType(sharedType);
+      const sharedLatency = Number(params.get("latency"));
+      if (sharedLatency >= 0.5 && sharedLatency <= 4) setCustomLatency(sharedLatency);
+    });
   }, []);
 
   useEffect(() => {

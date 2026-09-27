@@ -9,7 +9,13 @@ import { challenges } from "@/data/challenges";
 export function ChallengePanel({ stageIndex }: { stageIndex: number }) {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [level, setLevel] = useState<"guided" | "expert">("guided");
-  useEffect(() => { try { const saved=window.localStorage.getItem("url-journey-challenge"); if(saved) setAnswers(JSON.parse(saved) as Record<number,number>); } catch { /* Ignore invalid local progress. */ } }, []);
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("url-journey-challenge");
+      const parsed = saved ? JSON.parse(saved) as Record<number, number> : null;
+      if (parsed) queueMicrotask(() => setAnswers(parsed));
+    } catch { /* Ignore invalid local progress. */ }
+  }, []);
   useEffect(() => { window.localStorage.setItem("url-journey-challenge", JSON.stringify(answers)); }, [answers]);
   const challenge = challenges[stageIndex];
   const selected = answers[stageIndex];

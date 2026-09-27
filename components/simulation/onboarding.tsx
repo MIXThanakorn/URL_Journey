@@ -14,7 +14,11 @@ const steps = [
 export function Onboarding() {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
-  useEffect(() => { if (window.localStorage.getItem("url-journey-onboarded") !== "1") setOpen(true); }, []);
+  useEffect(() => {
+    if (window.localStorage.getItem("url-journey-onboarded") !== "1") {
+      queueMicrotask(() => setOpen(true));
+    }
+  }, []);
   const finish = () => { window.localStorage.setItem("url-journey-onboarded", "1"); setOpen(false); };
   const item = steps[step]; const Icon = item.icon;
   return (
