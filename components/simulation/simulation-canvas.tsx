@@ -1,14 +1,17 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, FileCode2, Globe2, LockKeyhole, Monitor, Server, Waypoints } from "lucide-react";
-import type { StageId, UrlInfo } from "@/types/simulation";
+import { Check, FileCode2, LockKeyhole, Monitor, Server, TriangleAlert, Waypoints } from "lucide-react";
+import type { ErrorScenario, HttpMethod, StageId, UrlInfo } from "@/types/simulation";
 
 interface CanvasProps {
   stage: StageId;
   url: UrlInfo;
   progress: number;
   paused: boolean;
+  error?: ErrorScenario;
+  method: HttpMethod;
+  responseStatus: number;
 }
 
 const nodeStyle = "absolute flex min-w-24 flex-col items-center gap-2 text-center font-mono text-[11px] text-slate-400";
@@ -54,13 +57,13 @@ function UrlParseView({ url }: { url: UrlInfo }) {
   );
 }
 
-function NetworkView({ stage, secure }: { stage: StageId; secure: boolean }) {
+function NetworkView({ stage, secure, method, responseStatus }: { stage: StageId; secure: boolean; method: HttpMethod; responseStatus: number }) {
   const isDns = stage === "dns";
   const isTcp = stage === "tcp";
   const isTls = stage === "tls";
   const isRequest = stage === "http-request";
   const isResponse = stage === "http-response";
-  const label = isDns ? "DNS QUERY" : isTcp ? "SYN" : isTls ? "CLIENT HELLO" : isRequest ? "GET /" : "200 OK";
+  const label = isDns ? "DNS QUERY" : isTcp ? "SYN" : isTls ? "CLIENT HELLO" : isRequest ? `${method} /` : `${responseStatus}`;
   const reverse = isResponse;
 
   if (isTls && !secure) {
@@ -107,23 +110,35 @@ function RenderView({ complete = false }: { complete?: boolean }) {
           <p className="mt-2 text-sm text-slate-500">The simulated journey reached the screen.</p>
         </motion.div>
       ) : (
-        <div className="flex w-full max-w-xl items-center justify-between gap-1">
-          {steps.map((step, index) => (
-            <div key={step} className="contents">
-              <motion.div initial={{ opacity: 0, scale: .9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: index * .13 }} className="flex min-w-0 flex-1 flex-col items-center gap-2">
-                <div className="grid h-10 w-10 place-items-center rounded-md border border-cyan-400/25 bg-cyan-400/8 text-cyan-300"><FileCode2 size={17} /></div>
-                <span className="text-center font-mono text-[8px] text-slate-500 sm:text-[9px]">{step}</span>
-              </motion.div>
-              {index < steps.length - 1 && <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: index * .13 + .12 }} className="h-px w-3 origin-left bg-cyan-400/40 sm:w-7" />}
+        <div className="grid w-full max-w-3xl gap-5 px-2 md:grid-cols-[1fr_180px]">
+          <div>
+            <div className="flex items-center justify-between gap-1">
+              {steps.map((step, index) => (
+                <div key={step} className="contents">
+                  <motion.div initial={{ opacity: 0, scale: .9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: index * .13 }} className="flex min-w-0 flex-1 flex-col items-center gap-2">
+                    <div className="grid h-9 w-9 place-items-center rounded-md border border-cyan-400/25 bg-cyan-400/8 text-cyan-300"><FileCode2 size={15} /></div>
+                    <span className="text-center font-mono text-[8px] text-slate-500">{step}</span>
+                  </motion.div>
+                  {index < steps.length - 1 && <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: index * .13 + .12 }} className="h-px w-2 origin-left bg-cyan-400/40 sm:w-5" />}
+                </div>
+              ))}
             </div>
-          ))}
+            <div className="mt-5 grid grid-cols-2 gap-2 font-mono text-[9px] text-slate-600">
+              <div className="rounded border border-slate-800 bg-[#050a11] p-3"><span className="text-blue-300">html</span><br />├─ head<br />└─ body<br />&nbsp;&nbsp;├─ header<br />&nbsp;&nbsp;└─ main</div>
+              <div className="rounded border border-slate-800 bg-[#050a11] p-3"><span className="text-violet-300">cssom</span><br />├─ body<br />│&nbsp;&nbsp;└─ display:block<br />└─ main<br />&nbsp;&nbsp;└─ color:…</div>
+            </div>
+          </div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .6 }} className="rounded border border-slate-700 bg-[#0b1623] p-2 shadow-[0_0_30px_rgb(34_211_238/8%)]">
+            <div className="flex gap-1 border-b border-slate-700 pb-2"><span className="h-1.5 w-1.5 rounded-full bg-rose-400/70" /><span className="h-1.5 w-1.5 rounded-full bg-amber-400/70" /><span className="h-1.5 w-1.5 rounded-full bg-emerald-400/70" /></div>
+            <div className="mt-2 h-5 rounded bg-cyan-400/12" /><div className="mt-2 h-2 w-2/3 rounded bg-slate-600/50" /><div className="mt-2 h-16 rounded border border-slate-700 bg-blue-400/5" />
+          </motion.div>
         </div>
       )}
     </div>
   );
 }
 
-export function SimulationCanvas({ stage, url, progress, paused }: CanvasProps) {
+export function SimulationCanvas({ stage, url, progress, paused, error, method, responseStatus }: CanvasProps) {
   const networkStages: readonly StageId[] = ["dns", "tcp", "tls", "http-request", "http-response"];
   return (
     <section className="relative min-h-[330px] overflow-hidden rounded-lg border border-slate-800/90 bg-[#070d16]/95 shadow-[inset_0_1px_rgb(255_255_255/2%)]">
@@ -136,10 +151,16 @@ export function SimulationCanvas({ stage, url, progress, paused }: CanvasProps) 
       <div className="h-full min-h-[330px] pt-10">
         <AnimatePresence mode="wait">
           <motion.div key={stage} className="h-full min-h-[290px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: .25 }}>
-            {stage === "url-parse" && <UrlParseView url={url} />}
-            {networkStages.includes(stage) && <NetworkView stage={stage} secure={url.secure} />}
-            {stage === "render" && <RenderView />}
-            {stage === "complete" && <RenderView complete />}
+            {error ? (
+              <div className="grid h-full min-h-[290px] place-items-center px-8 text-center"><div><div className="mx-auto grid h-14 w-14 place-items-center rounded-xl border border-rose-400/30 bg-rose-400/8 text-rose-300"><TriangleAlert size={24} /></div><p className="mt-4 font-mono text-sm text-rose-200">{error.title.toUpperCase()}</p><p className="mt-2 max-w-md text-sm leading-6 text-slate-500">{error.explanation}</p></div></div>
+            ) : (
+              <>
+                {stage === "url-parse" && <UrlParseView url={url} />}
+                {networkStages.includes(stage) && <NetworkView stage={stage} secure={url.secure} method={method} responseStatus={responseStatus} />}
+                {stage === "render" && <RenderView />}
+                {stage === "complete" && <RenderView complete />}
+              </>
+            )}
           </motion.div>
         </AnimatePresence>
       </div>

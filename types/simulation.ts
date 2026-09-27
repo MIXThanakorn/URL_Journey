@@ -10,6 +10,11 @@ export type StageId =
 
 export type RunStatus = "ready" | "running" | "paused" | "completed" | "error";
 export type StageStatus = "pending" | "active" | "complete" | "error";
+export type NetworkProfileId = "fast" | "4g" | "slow-4g" | "3g" | "offline" | "custom";
+export type ErrorScenarioId = "none" | "dns-failure" | "connection-timeout" | "tls-error" | "404" | "500" | "slow-server";
+export type ExplanationMode = "beginner" | "developer" | "deep-dive";
+export type ViewMode = "simulation" | "architecture" | "challenge";
+export type HttpMethod = "GET" | "HEAD" | "POST";
 
 export interface UrlInfo {
   protocol: string;
@@ -40,12 +45,49 @@ export interface SimulationState {
   url: string;
   parsedUrl: UrlInfo;
   elapsed: number;
+  networkProfile: NetworkProfileId;
+  errorScenario: ErrorScenarioId;
+  method: HttpMethod;
+  responseStatus: number;
+  contentType: string;
 }
 
 export type SimulationAction =
-  | { type: "START"; url: string; parsedUrl: UrlInfo }
-  | { type: "TICK"; delta: number; stageCount: number }
+  | { type: "START"; url: string; parsedUrl: UrlInfo; options: SimulationOptions }
+  | { type: "TICK"; delta: number; stageCount: number; duration: number; failsHere: boolean }
   | { type: "TOGGLE_PAUSE" }
   | { type: "SELECT_STAGE"; index: number }
   | { type: "REPLAY" }
   | { type: "RESET"; url: string; parsedUrl: UrlInfo };
+
+export interface SimulationOptions {
+  networkProfile: NetworkProfileId;
+  errorScenario: ErrorScenarioId;
+  method: HttpMethod;
+  responseStatus: number;
+  contentType: string;
+}
+
+export interface NetworkProfile {
+  id: NetworkProfileId;
+  label: string;
+  description: string;
+  multiplier: number;
+  timing: { dns: number; tcp: number; tls: number; server: number };
+}
+
+export interface ErrorScenario {
+  id: ErrorScenarioId;
+  label: string;
+  stage: StageId | null;
+  title: string;
+  explanation: string;
+}
+
+export interface Challenge {
+  stage: StageId;
+  question: string;
+  answers: readonly string[];
+  correctIndex: number;
+  explanation: string;
+}
